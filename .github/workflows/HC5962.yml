@@ -58,8 +58,8 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        git clone $REPO_URL -b $REPO_BRANCH HC5962
+        ln -sf /workdir/HC5962 $GITHUB_WORKSPACE/openwrt
 
     - name: Cache
       uses: klever1988/cachewrtbuild@main
@@ -68,7 +68,7 @@ jobs:
         toolchain: 'true'
         skip: 'true'
         clean: 'false'
-        prefix: ${{ github.workspace }}/HC5962
+        prefix: ${{ github.workspace }}/openwrt
   
     - name: Load custom feeds
       run: |
