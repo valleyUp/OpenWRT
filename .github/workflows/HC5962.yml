@@ -11,6 +11,8 @@
 name: Build HC5962
 
 on:
+  schedule:
+    - cron: '31 00 2 * *'
   repository_dispatch:
   workflow_dispatch:
     inputs:
