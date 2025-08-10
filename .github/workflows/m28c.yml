@@ -102,6 +102,18 @@ jobs:
         restore-keys: |
           dl-${{ runner.os }}-${{ env.REPO_BRANCH }}-
 
+    - name: Restore toolchain cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          openwrt/staging_dir/host
+          openwrt/staging_dir/toolchain-*
+          openwrt/build_dir/host
+          openwrt/build_dir/toolchain-*
+        key: toolchain-${{ runner.os }}-${{ env.REPO_BRANCH }}-${{ hashFiles('n28c.config') }}
+        restore-keys: |
+          toolchain-${{ runner.os }}-${{ env.REPO_BRANCH }}-
+
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
