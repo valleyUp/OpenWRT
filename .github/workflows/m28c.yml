@@ -30,6 +30,7 @@ env:
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: m28c.sh
   MAKE_THREADS: 3
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -79,6 +80,28 @@ jobs:
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
+    - name: Prepare ccache directory
+      run: |
+        mkdir -p "$CCACHE_DIR"
+        echo "CCACHE_DIR=$CCACHE_DIR"
+        which ccache && ccache -M 2G || true
+
+    - name: Restore ccache
+      uses: actions/cache@v3
+      with:
+        path: .ccache
+        key: ccache-${{ runner.os }}-${{ env.REPO_BRANCH }}-${{ hashFiles('m28c.sh', 'n28c.config') }}
+        restore-keys: |
+          ccache-${{ runner.os }}-${{ env.REPO_BRANCH }}-
+
+    - name: Restore dl cache
+      uses: actions/cache@v3
+      with:
+        path: openwrt/dl
+        key: dl-${{ runner.os }}-${{ env.REPO_BRANCH }}-${{ hashFiles('feeds.conf.default') }}
+        restore-keys: |
+          dl-${{ runner.os }}-${{ env.REPO_BRANCH }}-
+
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
@@ -126,6 +149,7 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        which ccache && ccache -s || true
 
     - name: Check space usage
       if: (!cancelled())
